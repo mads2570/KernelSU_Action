@@ -8,7 +8,28 @@ jobs:
   build-kernel:
     executor: ubuntu-executor
     steps:
-      - checkout
+      - run:
+          name: Clone Kernel Source
+          command: |
+            git clone --depth=1 -b main https://github.com/mads2570/a42-kernel.git kernel-source
+      - run:
+          name: Clone Clang Toolchain
+          command: |
+            git clone --depth=1 -b main https://github.com/SN-Abdullah-Al-Noman/llvm-arm-toolchain-ship-10.0.git aosp-clang
+      - run:
+          name: Clone GCC 64 Toolchain
+          command: |
+            git clone --depth=1 -b android12L-release https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 aosp-clang/aarch64-linux-android-4.9
+      - run:
+          name: Clone GCC 32 Toolchain
+          command: |
+            git clone --depth=1 -b arm32 https://github.com/JackA1ltman/Google-GCC-Android-4.9.git aosp-clang/arm-linux-androideabi-4.9
+      - run:
+          name: Download KernelSU Setup Script
+          command: |
+            mkdir -p kernel-source/tools/KernelSU
+            curl -sSL -o kernel-source/tools/KernelSU/setup.sh "https://raw.githubusercontent.com/ShirkNeko/SukiSU-Ultra/refs/heads/susfs-dev/kernel/setup.sh"
+            chmod +x kernel-source/tools/KernelSU/setup.sh
       - run:
           name: Installing Dependencies
           command: |
@@ -31,7 +52,7 @@ jobs:
             export PATH="/usr/lib/ccache:$PATH"
             echo "date=$date"
             echo "Building kernel with $args"
-            make -C $(pwd) O=out $KERNEL_MAKE_ENV CC="ccache clang" LLVM=1 LLVM_IAS=1 vendor/m23xq_eur_open_defconfig && make O=out $KERNEL_MAKE_ENV CC="ccache clang" LLVM=1 LLVM_IAS=1 -j$(grep -c ^processor /proc/cpuinfo)
+            make -C $(pwd) O=out $KERNEL_MAKE_ENV CC="ccache clang" LLVM=1 LLVM_IAS=1 vendor/a42xq_eur_open_defconfig && make O=out $KERNEL_MAKE_ENV CC="ccache clang" LLVM=1 LLVM_IAS=1 -j$(grep -c ^processor /proc/cpuinfo)
             ./tools/mkdtimg create out/arch/arm64/boot/dtbo.img --page_size=4096 $(find out/arch/arm64/boot/dts/samsung/m23/m23xq/ -name *.dtbo)
       - store_artifacts:
           path: kernel-source/out/arch/arm64/boot
