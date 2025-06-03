@@ -11,6 +11,9 @@ jobs:
             lsb_release -a
             UBUNTU_VERSION=$(lsb_release -sr)
             sudo apt-get update
+            if [ "$UBUNTU_VERSION" == "22.04" ]; then
+              sudo apt-get install -y git ccache automake flex lzop bison gperf build-essential zip curl zlib1g-dev g++-multilib libxml2-utils bzip2 libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools pngcrush schedtool
+            fi
       - run:
           name: Download and extract Clang
           command: |
