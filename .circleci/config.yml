@@ -13,7 +13,7 @@ jobs:
             # Install lsb-release with correct package name and ensure apt-utils is present
             apt-get -y install apt-utils lsb-release || apt-get -y install apt-utils && apt-get -y install lsb-release || true
             git config --global user.name "mads2570"
-            git config --global user.email "qwerty2570@live.com"
+            git config --global user.email "qwerty2570@live.com" 
             git config --global color.ui false
             git clone https://github.com/mads2570/android_kerus.git && cd android_kerus && cd scripts && bash setup/android_build_env.sh && cd ..
             mkdir predator
