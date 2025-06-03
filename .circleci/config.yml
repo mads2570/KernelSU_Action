@@ -4,6 +4,10 @@ executors:
     docker:
       - image: cimg/base:stable
     working_directory: ~/project
+  node-executor:
+    docker:
+      - image: cimg/node:18.20.5
+    working_directory: ~/project
 jobs:
   build-kernel:
     executor: ubuntu-executor
@@ -53,7 +57,32 @@ jobs:
       - store_artifacts:
           path: ./$KERNEL_DIR/$OUT_DIR/arch/$ARCH/boot/Image
           destination: Image-${KERNEL_DEVICE}-${KERNEL_NAME}-${KERNEL_BRANCH}
+  playwright-e2e:
+    executor: node-executor
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-deps-{{ checksum "package-lock.json" }}
+            - v1-deps-
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - save_cache:
+          paths:
+            - ~/.npm
+          key: v1-deps-{{ checksum "package-lock.json" }}
+      - run:
+          name: Install Playwright Browsers
+          command: npx playwright install --with-deps
+      - run:
+          name: Run Playwright E2E tests
+          command: npx playwright test
+      - store_artifacts:
+          path: test-results
+          destination: playwright-test-results
 workflows:
   build_kernel_workflow:
     jobs:
       - build-kernel
+      - playwright-e2e
