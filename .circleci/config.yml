@@ -6,6 +6,12 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install necessary packages
+          command: |
+            lsb_release -a
+            UBUNTU_VERSION=$(lsb_release -sr)
+            sudo apt-get update
+      - run:
           name: Download and extract Clang
           command: |
             if [[ "$CLANG_SOURCE" == *.tar.xz ]]; then
