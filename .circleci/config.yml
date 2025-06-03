@@ -17,6 +17,12 @@ jobs:
               sudo ls -lah /usr/bin/ | grep "python"
             fi
       - run:
+          name: Install GNU GCC
+          command: |
+            sudo apt-get install -y binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi
+            echo "export GCC_64='CROSS_COMPILE=aarch64-linux-gnu-'" >> $BASH_ENV
+            echo "export GCC_32='CROSS_COMPILE_ARM32=arm-linux-gnueabi-'" >> $BASH_ENV
+      - run:
           name: Download and extract Clang
           command: |
             if [[ "$CLANG_SOURCE" == *.tar.xz ]]; then
