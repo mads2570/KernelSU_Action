@@ -20,7 +20,7 @@ jobs:
             elif [[ "$CLANG_SOURCE" == *.tar.xz ]]; then
               wget -O clang.tar.xz "$CLANG_SOURCE"
               mkdir clang-custom
-              tar -C clang-custom/ -xvf clang.tar.xz --strip-components 1
+              tar -C clang-custom/ -xvf clang.tar.xz --strip-components=1
             elif [[ "$CLANG_SOURCE" == *.zip ]]; then
               wget -O clang.zip "$CLANG_SOURCE"
               mkdir clang-custom
@@ -30,7 +30,7 @@ jobs:
               cd clang-custom
               wget "$CLANG_SOURCE" -O antman
               chmod +x antman
-              bash antman -S
+              ./antman -S
               cd ..
             else
               echo "Not supported format of Clang!"
