@@ -1,23 +1,14 @@
 version: 2.1
 jobs:
-  build-kernel:
+  build:
     docker:
       - image: cimg/base:stable
-    environment:
-      GITHUB_WORKSPACE: /home/circleci/project
     steps:
       - checkout
       - run:
-          name: Set up Clang
+          name: Download and extract Clang
           command: |
-            # Set Clang
-            if [[ "$CLANG_SOURCE" == *.git ]]; then
-              git clone "$CLANG_SOURCE" -b "$CLANG_BRANCH" clang-custom --depth=1
-            elif [[ "$CLANG_SOURCE" == *.tar.gz ]]; then
-              wget -O clang.tar.gz "$CLANG_SOURCE"
-              mkdir clang-custom
-              tar -C clang-custom/ -zxvf clang.tar.gz
-            elif [[ "$CLANG_SOURCE" == *.tar.xz ]]; then
+            if [[ "$CLANG_SOURCE" == *.tar.xz ]]; then
               wget -O clang.tar.xz "$CLANG_SOURCE"
               mkdir clang-custom
               tar -C clang-custom/ -xvf clang.tar.xz --strip-components=1
@@ -25,37 +16,9 @@ jobs:
               wget -O clang.zip "$CLANG_SOURCE"
               mkdir clang-custom
               unzip clang.zip -d clang-custom/
-            elif [[ "$CLANG_SOURCE" == *antman* ]]; then
-              mkdir clang-custom
-              cd clang-custom
-              wget "$CLANG_SOURCE" -O antman
-              chmod +x antman
-              ./antman -S
-              cd ..
-            else
-              echo "Not supported format of Clang!"
-              exit 1
-      - run:
-          name: Add clang-custom to PATH
-          command: |
-            export PATH=$GITHUB_WORKSPACE/clang-custom/bin:$PATH
-            echo "export PATH=$GITHUB_WORKSPACE/clang-custom/bin:$PATH" >> $BASH_ENV
-      - run:
-          name: Build Kernel
-          command: |
-            cd $GITHUB_WORKSPACE/device_kernel/
-            if [ -z "$GCC_32" ] && [ -z "$GCC_64" ]; then
-              make CC="ccache clang" O=out ARCH=arm64 $CUSTOM_CMDS $EXTRA_CMDS $DEFCONFIG_NAME
-              make -j$(nproc --all) CC="ccache clang" O=out ARCH=arm64 $CUSTOM_CMDS $EXTRA_CMDS
-            else
-              make CC="ccache clang" O=out ARCH=arm64 $CUSTOM_CMDS $EXTRA_CMDS $GCC_64 $GCC_32 $DEFCONFIG_NAME
-              make -j$(nproc --all) CC="ccache clang" O=out ARCH=arm64 $CUSTOM_CMDS $EXTRA_CMDS $GCC_64 $GCC_32
             fi
-      - run:
-          name: DNT Run Step
-          command: echo "DNT step executed"
 workflows:
   version: 2
-  build:
+  build_and_test:
     jobs:
-      - build-kernel
+      - build
