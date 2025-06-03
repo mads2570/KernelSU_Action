@@ -1,72 +1,23 @@
 version: 2.1
 jobs:
-  build:
+  compile:
     docker:
-      - image: cimg/base:stable
+      - image: ubuntu:20.04
     steps:
-      - checkout
       - run:
-          name: Install necessary packages
+          name: Install dependencies and set up build environment
           command: |
-            lsb_release -a
-            UBUNTU_VERSION=$(lsb_release -sr)
-            sudo apt-get update
-            if [ "$UBUNTU_VERSION" == "22.04" ]; then
-              sudo apt-get install -y git ccache automake flex lzop bison gperf build-essential zip curl zlib1g-dev g++-multilib libxml2-utils bzip2 libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools pngcrush schedtool make optipng maven libssl-dev pwgen libswitch-perl policycoreutils minicom libxml-sax-base-perl libxml-simple-perl bc libc6-dev-i386 lib32ncurses5-dev libx11-dev lib32z-dev libgl1-mesa-dev xsltproc unzip device-tree-compiler python2 python3 dos2unix libncurses5
-              sudo apt-get install -y p7zip p7zip-full
-              sudo ls -lah /usr/bin/ | grep "python"
-            fi
-      - run:
-          name: Install GNU GCC
-          command: |
-            sudo apt-get install -y binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi
-            echo "export GCC_64='CROSS_COMPILE=aarch64-linux-gnu-'" >> $BASH_ENV
-            echo "export GCC_32='CROSS_COMPILE_ARM32=arm-linux-gnueabi-'" >> $BASH_ENV
-      - run:
-          name: Set Compile Environment
-          command: |
-            # Set GCC Aarch64
-            if [ -z "$GCC_64_SOURCE" ]; then
-              echo "Not set GCC 64!"
-            else
-              if [[ "$GCC_64_SOURCE" == *.git ]]; then
-                git clone "$GCC_64_SOURCE" -b "$GCC_64_BRANCH" gcc-64 --depth=1
-              fi
-              if [[ "$GCC_64_SOURCE" == *.tar.gz ]]; then
-                wget -O gcc-64.tar.gz "$GCC_64_SOURCE"
-                mkdir gcc-64
-                tar -C gcc-64/ -zxvf gcc-64.tar.gz
-              fi
-              if [[ "$GCC_64_SOURCE" == *.zip ]]; then
-                wget -O gcc-64.zip "$GCC_64_SOURCE"
-                mkdir gcc-64
-                unzip gcc-64.zip -d gcc-64/
-              fi
-              GCC_64_BIN=aarch64-linux-android-
-              echo "export GCC_64=CROSS_COMPILE=$(pwd)/gcc-64/bin/$GCC_64_BIN" >> $BASH_ENV
-            fi
-      - run:
-          name: Get Kernel Source
-          command: |
-            git clone --recursive "$KERNEL_SOURCE" -b "$KERNEL_BRANCH" device_kernel --depth=1
-            if [ -n "$DEFCONFIG_SOURCE" ]; then
-              wget "$DEFCONFIG_SOURCE" -O device_kernel/arch/arm64/configs/$DEFCONFIG_NAME
-            fi
-            echo "export KERNEL_VERSION=$(head -n 3 device_kernel/Makefile | grep -E 'VERSION|PATCHLEVEL' | awk '{print \$3}' | paste -sd '.')" >> $BASH_ENV
-      - run:
-          name: Download and extract Clang
-          command: |
-            if [[ "$CLANG_SOURCE" == *.tar.xz ]]; then
-              wget -O clang.tar.xz "$CLANG_SOURCE"
-              mkdir clang-custom
-              tar -C clang-custom/ -xvf clang.tar.xz --strip-components=1
-            elif [[ "$CLANG_SOURCE" == *.zip ]]; then
-              wget -O clang.zip "$CLANG_SOURCE"
-              mkdir clang-custom
-              unzip clang.zip -d clang-custom/
-            fi
+            apt-get -y update && apt-get -y upgrade && apt-get -y install bc build-essential zip curl libstdc++6 git wget gcc clang libssl-dev rsync flex bison cpio libncurses5 curl python-is-python3
+            git config --global user.name "mads2570"
+            git config --global user.email "qwerty2570@live.com"
+            git config --global color.ui false
+            git clone https://github.com/akhilnarang/scripts && cd scripts && bash setup/android_build_env.sh && cd ..
+            mkdir predator
+            cd predator
+            wget https://github.com/mads2570/a42-kernel/blob/circleci-project-setup/build_menu
+            source build_menu
 workflows:
-  version: 2
-  build_and_test:
+  version: 2.1
+  cooking:
     jobs:
-      - build
+      - compile
