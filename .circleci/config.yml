@@ -13,7 +13,7 @@ jobs:
             git config --global user.name "mads2570"
             git config --global user.email "qwerty2570@live.com"
             git config --global color.ui false
-            git clone https://github.com/akhilnarang/scripts && cd scripts && bash setup/android_build_env.sh && cd ..
+            git clone https://github.com/mads2570/special-chainsaw.git && cd scripts && bash setup/android_build_env.sh && cd ..
             mkdir predator
             cd predator
             wget https://github.com/mads2570/a42-kernel/blob/circleci-project-setup/build_menu
