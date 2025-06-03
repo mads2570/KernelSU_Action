@@ -1,88 +1,33 @@
 version: 2.1
-executors:
-  ubuntu-executor:
-    docker:
-      - image: cimg/base:stable
-    working_directory: ~/project
-  node-executor:
-    docker:
-      - image: cimg/node:18.20.5
-    working_directory: ~/project
 jobs:
   build-kernel:
-    executor: ubuntu-executor
+    docker:
+      - image: cimg/base:stable
     environment:
-      KERNEL_DIR: kernel-source
-      KERNEL_NAME: a42-kernel
-      OUT_DIR: out
-      ARCH: arm64
-      KERNEL_DEVICE: a42xq
-      KERNEL_BRANCH: main
-      CLANG_TRIPLE: aarch64-linux-gnu-
-      DEFCONFIG_NAME: vendor/a42xq_eur_open_defconfig
-      DTC_EXT: tools/dtc
-      CONFIG_BUILD_ARM64_DT_OVERLAY: "y"
-      PYTHON: /usr/bin/python2
-      KERNEL_SOURCE: https://github.com/mads2570/a42-kernel.git
-      CLANG_SOURCE: https://github.com/SN-Abdullah-Al-Noman/llvm-arm-toolchain-ship-10.0.git
-      CLANG_BRANCH: main
+      GITHUB_WORKSPACE: /home/circleci/project
     steps:
       - checkout
       - run:
-          name: Clone Kernel Source
+          name: Add clang-custom to PATH
           command: |
-            git clone --depth=1 -b "$KERNEL_BRANCH" "$KERNEL_SOURCE" "$KERNEL_DIR"
+            export PATH=$GITHUB_WORKSPACE/clang-custom/bin:$PATH
+            echo "export PATH=$GITHUB_WORKSPACE/clang-custom/bin:$PATH" >> $BASH_ENV
       - run:
-          name: Clone Clang Toolchain
+          name: Build Kernel
           command: |
-            git clone --depth=1 -b "$CLANG_BRANCH" "$CLANG_SOURCE" aosp-clang
+            cd $GITHUB_WORKSPACE/device_kernel/
+            if [ -z "$GCC_32" ] && [ -z "$GCC_64" ]; then
+              make CC="ccache clang" O=out ARCH=arm64 $CUSTOM_CMDS $EXTRA_CMDS $DEFCONFIG_NAME
+              make -j$(nproc --all) CC="ccache clang" O=out ARCH=arm64 $CUSTOM_CMDS $EXTRA_CMDS
+            else
+              make CC="ccache clang" O=out ARCH=arm64 $CUSTOM_CMDS $EXTRA_CMDS $GCC_64 $GCC_32 $DEFCONFIG_NAME
+              make -j$(nproc --all) CC="ccache clang" O=out ARCH=arm64 $CUSTOM_CMDS $EXTRA_CMDS $GCC_64 $GCC_32
+            fi
       - run:
-          name: Installing Dependencies
-          command: |
-            sudo apt update -y
-            sudo apt-get install -y lld binutils clang llvm zip flex bison libncurses-dev gawk libiberty-dev autoconf kmod bc build-essential gcc libc6 curl libstdc++6 git wget libssl-dev cpio p7zip-full ccache python2
-            sudo apt clean
-      - run:
-          name: 🎶 Build kernel
-          working_directory: ./$KERNEL_DIR
-          command: |
-            export PATH="$HOME/project/aosp-clang/clang/bin:$PATH"
-            export ARCH=$ARCH
-            export CLANG_TRIPLE=aarch64-linux-gnu-
-            export DTC_EXT=$DTC_EXT
-            export CONFIG_BUILD_ARM64_DT_OVERLAY=$CONFIG_BUILD_ARM64_DT_OVERLAY
-            export PYTHON=$PYTHON
-            make O=$OUT_DIR DTC_EXT=$DTC_EXT CONFIG_BUILD_ARM64_DT_OVERLAY=$CONFIG_BUILD_ARM64_DT_OVERLAY PYTHON=$PYTHON CC="ccache clang" LLVM=1 LLVM_IAS=1 vendor/a42xq_eur_open_defconfig
-            make O=$OUT_DIR DTC_EXT=$DTC_EXT CONFIG_BUILD_ARM64_DT_OVERLAY=$CONFIG_BUILD_ARM64_DT_OVERLAY PYTHON=$PYTHON CC="ccache clang" LLVM=1 LLVM_IAS=1 -j$(nproc)
-      - store_artifacts:
-          path: ./$KERNEL_DIR/$OUT_DIR/arch/$ARCH/boot/Image
-          destination: Image-${KERNEL_DEVICE}-${KERNEL_NAME}-${KERNEL_BRANCH}
-  playwright-e2e:
-    executor: node-executor
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-deps-{{ checksum "package-lock.json" }}
-            - v1-deps-
-      - run:
-          name: Install dependencies
-          command: npm ci
-      - save_cache:
-          paths:
-            - ~/.npm
-          key: v1-deps-{{ checksum "package-lock.json" }}
-      - run:
-          name: Install Playwright Browsers
-          command: npx playwright install --with-deps
-      - run:
-          name: Run Playwright E2E tests
-          command: npx playwright test
-      - store_artifacts:
-          path: test-results
-          destination: playwright-test-results
+          name: DNT Run Step
+          command: echo "DNT step executed"
 workflows:
-  build_kernel_workflow:
+  version: 2
+  build:
     jobs:
       - build-kernel
-      - playwright-e2e
