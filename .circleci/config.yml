@@ -48,11 +48,11 @@ jobs:
           command: |
             export PATH="$HOME/project/aosp-clang/clang/bin:$PATH"
             export ARCH=$ARCH
-            export CLANG_TRIPLE=$CLANG_TRIPLE
+            export CLANG_TRIPLE=aarch64-linux-gnu-
             export DTC_EXT=$DTC_EXT
             export CONFIG_BUILD_ARM64_DT_OVERLAY=$CONFIG_BUILD_ARM64_DT_OVERLAY
             export PYTHON=$PYTHON
-            make O=$OUT_DIR DTC_EXT=$DTC_EXT CONFIG_BUILD_ARM64_DT_OVERLAY=$CONFIG_BUILD_ARM64_DT_OVERLAY PYTHON=$PYTHON CC="ccache clang" LLVM=1 LLVM_IAS=1 $DEFCONFIG_NAME
+            make O=$OUT_DIR DTC_EXT=$DTC_EXT CONFIG_BUILD_ARM64_DT_OVERLAY=$CONFIG_BUILD_ARM64_DT_OVERLAY PYTHON=$PYTHON CC="ccache clang" LLVM=1 LLVM_IAS=1 vendor/a42xq_eur_open_defconfig
             make O=$OUT_DIR DTC_EXT=$DTC_EXT CONFIG_BUILD_ARM64_DT_OVERLAY=$CONFIG_BUILD_ARM64_DT_OVERLAY PYTHON=$PYTHON CC="ccache clang" LLVM=1 LLVM_IAS=1 -j$(nproc)
       - store_artifacts:
           path: ./$KERNEL_DIR/$OUT_DIR/arch/$ARCH/boot/Image
