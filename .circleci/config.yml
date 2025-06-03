@@ -23,6 +23,22 @@ jobs:
             echo "export GCC_64='CROSS_COMPILE=aarch64-linux-gnu-'" >> $BASH_ENV
             echo "export GCC_32='CROSS_COMPILE_ARM32=arm-linux-gnueabi-'" >> $BASH_ENV
       - run:
+          name: Set Compile Environment
+          command: |
+            # Set GCC Aarch64
+            if [ -z "$GCC_64_SOURCE" ]; then
+              echo "Not set GCC 64!"
+            else
+              if [[ "$GCC_64_SOURCE" == *.git ]]; then
+                git clone "$GCC_64_SOURCE" -b "$GCC_64_BRANCH" gcc-64 --depth=1
+              fi
+              if [[ "$GCC_64_SOURCE" == *.tar.gz ]]; then
+                wget -O gcc-64.tar.gz "$GCC_64_SOURCE"
+                mkdir gcc-64
+                tar -C gcc-64/ -zxvf gcc-64.tar.gz
+              fi
+            fi
+      - run:
           name: Download and extract Clang
           command: |
             if [[ "$CLANG_SOURCE" == *.tar.xz ]]; then
