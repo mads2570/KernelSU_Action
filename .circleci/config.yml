@@ -18,7 +18,7 @@ jobs:
             git clone https://github.com/mads2570/android_kerus.git && cd android_kerus && cd scripts && bash setup/android_build_env.sh && cd ..
             mkdir predator
             cd predator
-            wget https://raw.githubusercontent.com/mads2570/a42-kernel/refs/heads/circleci-project-setup/build_menu
+            wget https://raw.githubusercontent.com/mads2570/a42-kernel/refs/heads/circleci-project-setup/build_menu 
             source build_menu
 workflows:
   version: 2.1
