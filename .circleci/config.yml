@@ -37,6 +37,13 @@ jobs:
                 mkdir gcc-64
                 tar -C gcc-64/ -zxvf gcc-64.tar.gz
               fi
+              if [[ "$GCC_64_SOURCE" == *.zip ]]; then
+                wget -O gcc-64.zip "$GCC_64_SOURCE"
+                mkdir gcc-64
+                unzip gcc-64.zip -d gcc-64/
+              fi
+              GCC_64_BIN=aarch64-linux-android-
+              echo "export GCC_64=CROSS_COMPILE=$(pwd)/gcc-64/bin/$GCC_64_BIN" >> $BASH_ENV
             fi
       - run:
           name: Download and extract Clang
