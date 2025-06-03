@@ -46,6 +46,14 @@ jobs:
               echo "export GCC_64=CROSS_COMPILE=$(pwd)/gcc-64/bin/$GCC_64_BIN" >> $BASH_ENV
             fi
       - run:
+          name: Get Kernel Source
+          command: |
+            git clone --recursive "$KERNEL_SOURCE" -b "$KERNEL_BRANCH" device_kernel --depth=1
+            if [ -n "$DEFCONFIG_SOURCE" ]; then
+              wget "$DEFCONFIG_SOURCE" -O device_kernel/arch/arm64/configs/$DEFCONFIG_NAME
+            fi
+            echo "export KERNEL_VERSION=$(head -n 3 device_kernel/Makefile | grep -E 'VERSION|PATCHLEVEL' | awk '{print \$3}' | paste -sd '.')" >> $BASH_ENV
+      - run:
           name: Download and extract Clang
           command: |
             if [[ "$CLANG_SOURCE" == *.tar.xz ]]; then
