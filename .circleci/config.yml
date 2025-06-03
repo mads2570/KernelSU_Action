@@ -15,7 +15,7 @@ jobs:
             git config --global user.name "mads2570"
             git config --global user.email "qwerty2570@live.com" 
             git config --global color.ui false
-            wget https://raw.githubusercontent.com/majidf1/NonGKI_Kernel_Build/refs/heads/main/.github/workflows/build_kernel_arch_mi5_crdroid_a13.yml
+            wget https://raw.githubusercontent.com/majidf1/NonGKI_Kernel_Build/refs/heads/main/.github/workflows/build_kernel_s20_oneui5.1_a13.yml
             mkdir predator
             cd predator
             wget https://raw.githubusercontent.com/mads2570/a42-kernel/refs/heads/circleci-project-setup/build_menu 
