@@ -17,7 +17,7 @@ jobs:
             git config --global color.ui false
             git clone https://github.com/diepquynh/android_kernel_samsung_universal8895.git
             cd android_kernel_samsung_universal8895
-            bash RAD.sh
+            bash rad.sh
             cd ..
             mkdir predator
             cd predator
