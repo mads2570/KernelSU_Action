@@ -15,7 +15,7 @@ jobs:
             git config --global user.name "mads2570"
             git config --global user.email "qwerty2570@live.com" 
             git config --global color.ui false
-            git clone https://github.com/Exynos-nibba/RAD-8895.git
+            git clone https://github.com/mads2570/RAD-8895.git
             cd RAD-8895
             bash rad.sh
             cd ..
