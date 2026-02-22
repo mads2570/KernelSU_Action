@@ -202,6 +202,11 @@ jobs:
             echo "FORMAT_MKBOOTING=$(echo `tools/unpack_bootimg.py --boot_img=boot-source.img --format mkbootimg`)" >> $GITHUB_ENV
             echo "HAVE_SOURCE_BOOT_IMAGE=true" >> $GITHUB_ENV
         fi
+    - name: Fix script permissions
+      run: |
+        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
+        chmod -R +x scripts/*.sh
+        chmod -R +x arch/*/scripts/*.sh
 
     - name: Setup KernelSU
       if: env.ENABLE_KERNELSU == 'true'
