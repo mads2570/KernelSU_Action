@@ -204,9 +204,9 @@ jobs:
         fi
     - name: Fix script permissions
       run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        chmod -R +x scripts/*.sh
-        chmod -R +x arch/*/scripts/*.sh
+       cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
+       chmod -R +x scripts/*.sh || true
+       find arch -name "*.sh" -type f -exec chmod +x {} \; || true
 
     - name: Setup KernelSU
       if: env.ENABLE_KERNELSU == 'true'
